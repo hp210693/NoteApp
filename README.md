@@ -25,7 +25,6 @@
     6. npm install
     7. cd ios/
     8. pod install
-    9. npm install
-    10. npx react-native start
-    11. npx react-native run-ios (if error go step 12)
-    12. open xcode and run app
+    9. npx react-native start
+    10. npx react-native run-ios (if error go step 11)
+    11. open xcode and run app

@@ -56,6 +56,9 @@ io.on('connection', function (socket) {
   console.log('New client conection to server with id = ' + socket.id);
 
   var [publicKey, privateKey] = rsa.generateRSAKeys();
+  console.log(
+    '\n----------------------------------------------------------------------\n'
+  );
   console.log('Server prepare sent publickey = ' + publicKey);
 
   // The server sents a publicKey to mobile app
@@ -77,6 +80,20 @@ io.on('connection', function (socket) {
       .auth()
       // Sign in email and password on firebase
       .signInWithEmailAndPassword(emailEncrypted, hashpassword)
+      .then(function (user) {
+        console.log('\ndang goi ham then\n');
+        if (user) {
+          console.log('Login ok user = ' + user);
+          io.sockets.emit('server-sent-verify-email', 'auth/ok');
+          // console.log('\n\n sever dang gui list \n\n' + listNote);
+          // The server sent list note
+          io.sockets.emit('server-sent-listnote', listNote);
+        } else {
+          console.log('++logout = ' + user);
+          io.sockets.emit('server-sent-verify-email', 'auth/logout');
+          io.sockets.emit('server-sent-listnote', listNote);
+        }
+      })
       .catch(function (error) {
         // Handle Errors here.
         var errorCode = error.code;
@@ -84,16 +101,18 @@ io.on('connection', function (socket) {
         // [START_EXCLUDE]
         if (errorCode === 'auth/wrong-password') {
           console.log('Wrong password');
+          io.sockets.emit('server-sent-verify-email', errorCode);
+          io.sockets.emit('server-sent-listnote', listNote);
         } else {
           console.log('The server error: \n' + errorMessage);
+          io.sockets.emit('server-sent-verify-email', 'errorMessage');
+          io.sockets.emit('server-sent-listnote', listNote);
         }
-        console.log('Unknown--' + error);
-
         // [END_EXCLUDE]
       });
 
     ///////////////////////////////
-    firebase.auth().onAuthStateChanged(function (user) {
+    /*firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         console.log('Login ok user = ' + user);
         io.sockets.emit('server-sent-verify-email', 'auth/ok');
@@ -105,6 +124,6 @@ io.on('connection', function (socket) {
         io.sockets.emit('server-sent-verify-email', 'auth/logout');
         io.sockets.emit('server-sent-listnote', listNote);
       }
-    });
+    });*/
   });
 });
