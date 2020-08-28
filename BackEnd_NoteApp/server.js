@@ -56,9 +56,7 @@ io.on('connection', function (socket) {
   console.log('New client conection to server with id = ' + socket.id);
 
   var [publicKey, privateKey] = rsa.generateRSAKeys();
-  console.log(
-    '\n----------------------------------------------------------------------\n'
-  );
+
   console.log('Server prepare sent publickey = ' + publicKey);
 
   // The server sents a publicKey to mobile app
@@ -81,11 +79,9 @@ io.on('connection', function (socket) {
       // Sign in email and password on firebase
       .signInWithEmailAndPassword(emailEncrypted, hashpassword)
       .then(function (user) {
-        console.log('\ndang goi ham then\n');
         if (user) {
           console.log('Login ok user = ' + user);
           io.sockets.emit('server-sent-verify-email', 'auth/ok');
-          // console.log('\n\n sever dang gui list \n\n' + listNote);
           // The server sent list note
           io.sockets.emit('server-sent-listnote', listNote);
         } else {
@@ -110,20 +106,5 @@ io.on('connection', function (socket) {
         }
         // [END_EXCLUDE]
       });
-
-    ///////////////////////////////
-    /*firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        console.log('Login ok user = ' + user);
-        io.sockets.emit('server-sent-verify-email', 'auth/ok');
-        // console.log('\n\n sever dang gui list \n\n' + listNote);
-        // The server sent list note
-        io.sockets.emit('server-sent-listnote', listNote);
-      } else {
-        console.log('++logout = ' + user);
-        io.sockets.emit('server-sent-verify-email', 'auth/logout');
-        io.sockets.emit('server-sent-listnote', listNote);
-      }
-    });*/
   });
 });

@@ -5,10 +5,12 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Alert,
   TouchableOpacity,
 } from 'react-native';
 import io from 'socket.io-client';
 import RSAKey from 'react-native-rsa';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 var currentObj;
 class Login extends Component {
@@ -27,10 +29,21 @@ class Login extends Component {
       publicKeyServer: '',
       nodelist: [],
       verifiedAcc: '',
+      spinner: false,
     };
 
     // Socket io is connect to local host
     this.socket = io('http://localhost:3000');
+
+    this.socket.on('disconnect', (reason) => {
+      if (reason === 'io server disconnect') {
+        // the disconnection was initiated by the server, you need to reconnect manually
+        socket.connect();
+      } else {
+        currentObj.setState({publicKeyServer: ''});
+        this.hintShowLoading(2000, false);
+      }
+    });
 
     // The sever will be sent a public key to the mobile
     this.socket.on('server-sent-pubickey', function (publicKey) {
@@ -49,16 +62,18 @@ class Login extends Component {
 
     // The server will be sent list note data
     this.socket.on('server-sent-listnote', function (data) {
-      //console.log('\n+++++da nha duoc list note= ' + data);
       console.log('vvvvvvv= ' + currentObj.state.verifiedAcc);
-      //  if (!waiting) return;
+
+      currentObj.hintShowLoading(0, false);
       if (currentObj.state.verifiedAcc === 'auth/ok') {
         currentObj.setState({notelist: data});
         currentObj.moveDetailScreen();
         console.log('\n+++++list note= ' + currentObj.state.notelist);
       } else {
         console.log('vvvvvvv= ' + currentObj.state.verifiedAcc);
-        alert('---Some thing error!');
+        setTimeout(() => {
+          Alert.alert('Some thing wrong!');
+        }, 10);
       }
     });
   }
@@ -105,12 +120,25 @@ class Login extends Component {
     });
   }
 
+  hintShowLoading(time, status) {
+    setTimeout(() => {
+      this.setState({
+        spinner: status,
+      });
+    }, time);
+  }
+
   render() {
     return (
       <View
         style={styles.container}
         backgroundColor={this.state.containerColor}>
         <Text style={styles.header}>Login</Text>
+        <Spinner
+          visible={this.state.spinner}
+          textContent={'Loading...'}
+          textStyle={styles.spinnerTextStyle}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -126,10 +154,14 @@ class Login extends Component {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
+              this.hintShowLoading(0, true);
               if (currentObj.state.publicKeyServer != '') {
                 this.nextContinue();
               } else {
-                alert('Some thing wrong!');
+                this.hintShowLoading(3000, false);
+                setTimeout(() => {
+                  Alert.alert('Some thing wrong!');
+                }, 3050);
               }
             }}>
             <Image
@@ -181,6 +213,9 @@ styles = StyleSheet.create({
     width: 30,
     height: 30,
     alignContent: 'center',
+  },
+  spinnerTextStyle: {
+    color: '#FFF',
   },
 });
 export default Login;
