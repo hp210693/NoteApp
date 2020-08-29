@@ -33,7 +33,9 @@ class Login extends Component {
     };
 
     // Socket io is connect to local host
-    this.socket = io('http://localhost:3000');
+    this.socket = io(
+      'https://note-app-demo.herokuapp.com/:' + process.env.PORT,
+    ); //('http://localhost:3000');
 
     this.socket.on('disconnect', (reason) => {
       if (reason === 'io server disconnect') {
