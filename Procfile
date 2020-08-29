@@ -1,1 +1,0 @@
-web: node BackEnd_NoteApp/server.js
